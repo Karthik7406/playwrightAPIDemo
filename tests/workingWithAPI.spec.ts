@@ -1,6 +1,14 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, request } from '@playwright/test';
 
 import tags from "../test-data/tags.json";
+import 'dotenv/config'
+
+
+let userEmail = process.env["EMAIL"]!;
+let password = process.env["PASSWORD"]!;
+
+
+
 
 test.beforeEach(async ({ page }) => {
 
@@ -10,6 +18,18 @@ test.beforeEach(async ({ page }) => {
     })
   })
 
+  await page.goto("https://conduit.bondaracademy.com/");
+  //authenticating the session
+
+  await page.getByText("Sign in").click();
+  await page.getByPlaceholder("Email").fill(userEmail);
+  await page.getByPlaceholder("Password").fill(password);
+
+  await page.getByRole("button", {name: "Sign in"}).click();
+})
+
+
+test('has title', async ({ page }) => {
 
   await page.route("*/**/api/articles*", async route => {
 
@@ -26,19 +46,65 @@ test.beforeEach(async ({ page }) => {
 
   })
 
-  await page.goto("https://conduit.bondaracademy.com/");
-})
+  await page.getByText("Global Feed").click();
 
-
-test('has title', async ({ page }) => {
-  //await page.waitForTimeout(500);
   await expect(page.locator(".navbar-brand")).toHaveText("conduit");
-
   await expect(page.locator("app-article-list h1").first()).toContainText("This is the modified title")
   await expect(page.locator("app-article-list p").first()).toContainText("This is the modified description")
 });
 
 
+
+
+test("delete article", async ({ page, request }) => {
+
+  const response = await request.post("https://conduit-api.bondaracademy.com/api/users/login", {
+
+    data: {
+      "user": {
+        "email": userEmail,
+        "password": password
+      }
+    }
+
+  });
+
+  const responseBody = await response.json();
+  const accessToken = responseBody.user.token;
+
+  console.log("response body ", accessToken);
+
+
+  const articleResponse = await request.post("https://conduit-api.bondaracademy.com/api/articles/", {
+    data: {
+      "article": {
+        "title": "test article",
+        "description": "test article description",
+        "body": "This is a test article",
+        "tagList": [
+          "test"
+        ]
+      },
+    },
+    headers: {
+      Authorization: `Token ${accessToken}`
+    }
+  })
+  console.log("article value ", await articleResponse.json())
+  expect(articleResponse.status()).toEqual(201);
+
+  await page.getByText("Global Feed").click();
+  await page.getByText("test article").first().click();
+  await page.getByRole("button", {name: " Delete Article "}).first().click()
+  await page.getByText("Global Feed").click();
+
+  //check first article doesnot contain the created test article
+  await expect(page.locator("app-article-list h1").first()).not.toContainText("test article")
+
+
+  
+
+})
 
 
 
