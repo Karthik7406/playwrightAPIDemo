@@ -61,21 +61,21 @@ test('has title', async ({ page }) => {
 
 test("delete article", async ({ page, request }) => {
 
-  const response = await request.post("https://conduit-api.bondaracademy.com/api/users/login", {
+  // const response = await request.post("https://conduit-api.bondaracademy.com/api/users/login", {
 
-    data: {
-      "user": {
-        "email": userEmail,
-        "password": password
-      }
-    }
+  //   data: {
+  //     "user": {
+  //       "email": userEmail,
+  //       "password": password
+  //     }
+  //   }
 
-  });
+  // });
 
-  const responseBody = await response.json();
-  const accessToken = responseBody.user.token;
+  // const responseBody = await response.json();
+  // const accessToken = responseBody.user.token;
 
-  console.log("response body ", accessToken);
+ 
 
 
   const articleResponse = await request.post("https://conduit-api.bondaracademy.com/api/articles/", {
@@ -89,9 +89,9 @@ test("delete article", async ({ page, request }) => {
         ]
       },
     },
-    headers: {
-      Authorization: `Token ${accessToken}`
-    }
+    // headers: {
+    //   Authorization: `Token ${accessToken}`
+    // }
   })
   console.log("article value ", await articleResponse.json())
   expect(articleResponse.status()).toEqual(201);
@@ -134,26 +134,30 @@ test("intercepting browser API response", async({page, request}) => {
   await page.getByText("Global Feed").click();
   await expect(page.locator("app-article-list .article-preview").first()).toContainText("playwright automation test");
 
-  const response = await request.post("https://conduit-api.bondaracademy.com/api/users/login", {
 
-    data: {
-      "user": {
-        "email": userEmail,
-        "password": password
-      }
-    }
+  // not required as access token is passed thorugh playwright config
+  // const response = await request.post("https://conduit-api.bondaracademy.com/api/users/login", {
 
-  });
+  //   data: {
+  //     "user": {
+  //       "email": userEmail,
+  //       "password": password
+  //     }
+  //   }
 
-  const responseBody = await response.json();
-  const accessToken = responseBody.user.token;
+  // });
+
+  // const responseBody = await response.json();
+  // const accessToken = responseBody.user.token;
 
 
-  let deleteResponse = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugID}`, {
-    headers: {
-      Authorization: `Token ${accessToken}`
-    }
-  });
+  // let deleteResponse = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugID}`, {
+  //   headers: {
+  //     Authorization: `Token ${accessToken}`
+  //   }
+  // });
+
+  let deleteResponse = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugID}`);
 
   expect(deleteResponse.status()).toEqual(204);
 })
