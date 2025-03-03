@@ -18,14 +18,17 @@ test.beforeEach(async ({ page }) => {
     })
   })
 
+ 
+  // //authenticating the session
+
+  // await page.getByText("Sign in").click();
+  // await page.getByPlaceholder("Email").fill(userEmail);
+  // await page.getByPlaceholder("Password").fill(password);
+
+  // await page.getByRole("button", {name: "Sign in"}).click();
+
+
   await page.goto("https://conduit.bondaracademy.com/");
-  //authenticating the session
-
-  await page.getByText("Sign in").click();
-  await page.getByPlaceholder("Email").fill(userEmail);
-  await page.getByPlaceholder("Password").fill(password);
-
-  await page.getByRole("button", {name: "Sign in"}).click();
 })
 
 
@@ -109,7 +112,6 @@ test("delete article", async ({ page, request }) => {
 
 test("intercepting browser API response", async({page, request}) => {
 
-  test.slow();
 
   await page.getByText("New Article").click();
 
@@ -119,7 +121,7 @@ test("intercepting browser API response", async({page, request}) => {
   await page.getByText("Publish Article").click();
 
   const articleResponse =  await page.waitForResponse("https://conduit-api.bondaracademy.com/api/articles/*");
-  await page.waitForTimeout(20000);
+  //await page.waitForTimeout(20000);
   await expect(page.locator(".article-page h1")).toContainText("playwright automation test");
 
 
@@ -147,12 +149,13 @@ test("intercepting browser API response", async({page, request}) => {
   const accessToken = responseBody.user.token;
 
 
-  await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugID}`, {
+  let deleteResponse = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${slugID}`, {
     headers: {
-      Authorizaton: `Token ${accessToken}`
+      Authorization: `Token ${accessToken}`
     }
   });
 
+  expect(deleteResponse.status()).toEqual(204);
 })
 
 
