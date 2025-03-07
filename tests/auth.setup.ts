@@ -12,6 +12,8 @@ const authFile = ".auth/user.json";
 
 setup("authentication", async({request}) => {
 
+  console.log("executing authentication setup");
+
   // await page.goto("https://conduit.bondaracademy.com/");
 
   // await page.getByText("Sign in").click();
@@ -37,14 +39,10 @@ setup("authentication", async({request}) => {
   const responseBody = await response.json();
 
   const accessToken = responseBody?.user?.token;
-  console.log("user data ", user);
-
   user.origins[0].localStorage[0].value = accessToken
   fs.writeFileSync(authFile, JSON.stringify(user));
 
+  //store access token to env variable
   process.env["ACCESS_TOKEN"] = accessToken;
-
-  console.log("response ", responseBody, process.env.ACCESS_TOKEN);
-
 
 })

@@ -32,6 +32,7 @@ export default defineConfig({
     trace: 'on-first-retry',
 
     extraHTTPHeaders: {
+      //setting access token programatically
       "Authorization": `Token ${process.env.ACCESS_TOKEN}`
     }
   },
@@ -41,42 +42,43 @@ export default defineConfig({
     {name: "setup", testMatch: "auth.setup.ts"},
 
     {
+      name: "articleSetup",
+      testMatch: "newArticle.setup.ts",
+      dependencies: ["setup"],
+      teardown: "articleCleanup"
+    },
+
+    {
+      name: "articleCleanup",
+      testMatch:"newArticle.cleanup.ts"
+    },
+
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'], storageState: ".auth/user.json" },
       dependencies: ["setup"]
     },
 
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'],storageState: ".auth/user.json" },
-      dependencies: ["setup"]
+      name: 'regression',
+      testMatch: "likesCounter.spec.ts",
+      use: { ...devices['Desktop Chrome'], storageState: ".auth/user.json" },
+      dependencies: ["articleSetup"]
     },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'], storageState: ".auth/user.json" },
-      dependencies: ["setup"]
-    },
-
-    /* Test against mobile viewports. */
     // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'],storageState: ".auth/user.json" },
+    //   dependencies: ["setup"]
     // },
 
-    /* Test against branded browsers. */
     // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'], storageState: ".auth/user.json" },
+    //   dependencies: ["setup"]
     // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+
+
   ],
 
   /* Run your local dev server before starting the tests */
